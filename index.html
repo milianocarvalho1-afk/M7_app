@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>M7 OS // SYSTEM LAUNCHER</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@600;800;900&family=Rajdhani:wght@500;600;700&display=swap');
+
+        :root {
+            --bg-main: #06090e;
+            --font-head: 'Orbitron', sans-serif;
+            --font-body: 'Rajdhani', sans-serif;
+            --comms-green: #22c55e;
+            --feed-blue: #38bdf8;
+            --game-gold: #f59e0b;
+            --music-purple: #d946ef;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: var(--font-body); -webkit-tap-highlight-color: transparent; }
+        body { background: var(--bg-main); color: #fff; height: 100vh; overflow: hidden; user-select: none; }
+
+        /* MOLDURA HUD ASSIMÉTRICA */
+        .hud-frame { position: fixed; inset: 0; pointer-events: none; z-index: 40; border: 2px solid rgba(56, 189, 248, 0.2); }
+        .hud-corner-tl {
+            position: absolute; top: 0; left: 0; width: 60px; height: 60px;
+            border-top: 4px solid var(--feed-blue); border-left: 4px solid var(--feed-blue);
+            clip-path: polygon(0 0, 100% 0, 70% 30%, 30% 30%, 30% 70%, 0 100%);
+            background: rgba(56, 189, 248, 0.15);
+        }
+        .hud-corner-br {
+            position: absolute; bottom: 0; right: 0; width: 60px; height: 60px;
+            border-bottom: 4px solid var(--comms-green); border-right: 4px solid var(--comms-green);
+            clip-path: polygon(100% 0, 100% 100%, 0 100%, 30% 70%, 70% 70%, 70% 30%);
+            background: rgba(34, 197, 94, 0.15);
+        }
+
+        /* TOP BAR */
+        .top-bar {
+            height: 50px; background: rgba(6, 9, 14, 0.95);
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 0 16px; position: fixed; top: 0; left: 0; right: 0; z-index: 30;
+            backdrop-filter: blur(8px);
+        }
+        .menu-trigger {
+            width: 36px; height: 36px; border-radius: 50%;
+            border: 1px solid var(--feed-blue); background: rgba(56, 189, 248, 0.1);
+            color: var(--feed-blue); display: flex; align-items: center; justify-content: center;
+            font-size: 16px; cursor: pointer;
+        }
+        .brand-title { font-family: var(--font-head); font-size: 15px; letter-spacing: 2px; color: var(--feed-blue); }
+
+        /* DRAWER LATERAL (TERMUX STYLE) */
+        .drawer-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 50; opacity: 0; pointer-events: none; transition: 0.3s; }
+        .drawer-overlay.open { opacity: 1; pointer-events: auto; }
+        .drawer-panel {
+            position: fixed; top: 0; bottom: 0; left: -280px; width: 260px;
+            background: rgba(10, 15, 24, 0.98); border-right: 2px solid var(--feed-blue);
+            z-index: 60; transition: left 0.3s; padding: 24px 16px; display: flex; flex-direction: column; gap: 20px;
+        }
+        .drawer-panel.open { left: 0; }
+        .drawer-item { display: flex; align-items: center; gap: 14px; padding: 10px; border-radius: 8px; cursor: pointer; }
+
+        .circle-icon {
+            width: 42px; height: 42px; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center; font-size: 18px;
+        }
+        .icon-comms { border: 1px solid var(--comms-green); color: var(--comms-green); background: rgba(34, 197, 94, 0.1); }
+        .icon-feed { border: 1px solid var(--feed-blue); color: var(--feed-blue); background: rgba(56, 189, 248, 0.1); }
+        .icon-games { border: 1px solid var(--game-gold); color: var(--game-gold); background: rgba(245, 158, 11, 0.1); }
+        .icon-music { border: 1px solid var(--music-purple); color: var(--music-purple); background: rgba(217, 70, 239, 0.1); }
+
+        .content-area { position: absolute; top: 50px; bottom: 0; left: 0; right: 0; overflow: hidden; }
+        .view-page { display: none; width: 100%; height: 100%; overflow-y: auto; padding: 16px; }
+        .view-page.active { display: block; }
+
+        /* SEÇÕES */
+        #view-comms { background: linear-gradient(180deg, #06090e 0%, #08120e 100%); }
+        #view-feed { padding: 0; }
+        .feed-container { height: 100%; overflow-y: scroll; scroll-snap-type: y mandatory; }
+        .video-card { height: 100%; width: 100%; scroll-snap-align: start; position: relative; background: #000; }
+        video { width: 100%; height: 100%; object-fit: cover; }
+        #view-games { background: linear-gradient(180deg, #06090e 0%, #150d03 100%); }
+        #view-music { background: linear-gradient(180deg, #06090e 0%, #140516 100%); text-align: center; }
+
+        .btn-action {
+            background: rgba(255,255,255,0.05); border: 1px solid #fff; color: #fff;
+            padding: 8px 16px; border-radius: 20px; font-family: var(--font-head); font-size: 11px; cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <div class="hud-frame"><div class="hud-corner-tl"></div><div class="hud-corner-br"></div></div>
+
+    <div class="top-bar">
+        <div class="menu-trigger" onclick="toggleDrawer()">☰</div>
+        <div class="brand-title">M7 OS</div>
+        <button class="btn-action" style="border-color:var(--feed-blue); color:var(--feed-blue);" onclick="alert('Use o app para transmissões!')">+ M7</button>
+    </div>
+
+    <div class="drawer-overlay" id="drawerOverlay" onclick="toggleDrawer()"></div>
+    <div class="drawer-panel" id="drawerPanel">
+        <h3 style="font-family:var(--font-head); color:var(--feed-blue); font-size:13px; margin-bottom:10px;">// M7 MODULES</h3>
+        <div class="drawer-item" onclick="navigate('comms')"><div class="circle-icon icon-comms">💬</div><span style="font-family:var(--font-head);">MENSAGENS</span></div>
+        <div class="drawer-item" onclick="navigate('feed')"><div class="circle-icon icon-feed">📡</div><span style="font-family:var(--font-head);">FEED STREAM</span></div>
+        <div class="drawer-item" onclick="navigate('games')"><div class="circle-icon icon-games">🎮</div><span style="font-family:var(--font-head);">HUB GAMER</span></div>
+        <div class="drawer-item" onclick="navigate('music')"><div class="circle-icon icon-music">🎶</div><span style="font-family:var(--font-head);">MÚSICAS</span></div>
+    </div>
+
+    <div class="content-area">
+        <div id="view-comms" class="view-page">
+            <h3 style="font-family:var(--font-head); color:var(--comms-green); font-size:13px;">// CENTRAL DE MENSAGENS</h3>
+            <p style="color:#94a3b8; font-size:12px; margin-top:10px;">Canal encriptado de comunicação M7 ativado.</p>
+        </div>
+        <div id="view-feed" class="view-page active">
+            <div class="feed-container" id="feedList">
+                <div style="padding:60px 20px; text-align:center;"><h4 style="color:var(--feed-blue); font-family:var(--font-head);">FEED STREAM M7</h4><p style="font-size:12px; color:#64748b;">Aguardando novas transmissões...</p></div>
+            </div>
+        </div>
+        <div id="view-games" class="view-page">
+            <h3 style="font-family:var(--font-head); color:var(--game-gold); font-size:13px;">// HUB GAMER</h3>
+            <p style="color:#94a3b8; font-size:12px; margin-top:10px;">Atalhos e estatísticas de jogos ativados.</p>
+        </div>
+        <div id="view-music" class="view-page">
+            <h3 style="font-family:var(--font-head); color:var(--music-purple); font-size:13px;">// PLAYER DE MÚSICA</h3>
+            <p style="color:#94a3b8; font-size:12px; margin-top:10px;">Acesso à biblioteca de áudio local.</p>
+        </div>
+    </div>
+
+    <script>
+        function toggleDrawer() {
+            document.getElementById('drawerOverlay').classList.toggle('open');
+            document.getElementById('drawerPanel').classList.toggle('open');
+        }
+        function navigate(id) {
+            document.querySelectorAll('.view-page').forEach(p => p.classList.remove('active'));
+            document.getElementById('view-' + id).classList.add('active');
+            toggleDrawer();
+        }
+    </script>
+</body>
+</html>
