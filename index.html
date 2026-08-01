@@ -1,144 +1,334 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>M7 OS // SYSTEM LAUNCHER</title>
-    <link rel="manifest" href="manifest.json">
-<style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>M7</title>
+  <link rel="manifest" href="manifest.json">
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      user-select: none;
+    }
 
-        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@600;800;900&family=Rajdhani:wght@500;600;700&display=swap');
+    body {
+      background-color: #0d1117;
+      color: #00f0ff;
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+      overflow: hidden;
+    }
 
-        :root {
-            --bg-main: #06090e;
-            --font-head: 'Orbitron', sans-serif;
-            --font-body: 'Rajdhani', sans-serif;
-            --comms-green: #22c55e;
-            --feed-blue: #38bdf8;
-            --game-gold: #f59e0b;
-            --music-purple: #d946ef;
-        }
+    /* HEADER FIXO */
+    header {
+      background: #161b22;
+      border-bottom: 2px solid #00f0ff;
+      padding: 15px;
+      text-align: center;
+      box-shadow: 0 0 15px rgba(0, 240, 255, 0.3);
+    }
 
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: var(--font-body); -webkit-tap-highlight-color: transparent; }
-        body { background: var(--bg-main); color: #fff; height: 100vh; overflow: hidden; user-select: none; }
+    header h1 {
+      font-size: 18px;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      text-shadow: 0 0 8px #00f0ff;
+    }
 
-        /* MOLDURA HUD ASSIMÉTRICA */
-        .hud-frame { position: fixed; inset: 0; pointer-events: none; z-index: 40; border: 2px solid rgba(56, 189, 248, 0.2); }
-        .hud-corner-tl {
-            position: absolute; top: 0; left: 0; width: 60px; height: 60px;
-            border-top: 4px solid var(--feed-blue); border-left: 4px solid var(--feed-blue);
-            clip-path: polygon(0 0, 100% 0, 70% 30%, 30% 30%, 30% 70%, 0 100%);
-            background: rgba(56, 189, 248, 0.15);
-        }
-        .hud-corner-br {
-            position: absolute; bottom: 0; right: 0; width: 60px; height: 60px;
-            border-bottom: 4px solid var(--comms-green); border-right: 4px solid var(--comms-green);
-            clip-path: polygon(100% 0, 100% 100%, 0 100%, 30% 70%, 70% 70%, 70% 30%);
-            background: rgba(34, 197, 94, 0.15);
-        }
+    /* CONTEÚDO PRINCIPAL (TELAS) */
+    main {
+      flex: 1;
+      overflow-y: auto;
+      padding: 15px;
+    }
 
-        /* TOP BAR */
-        .top-bar {
-            height: 50px; background: rgba(6, 9, 14, 0.95);
-            display: flex; align-items: center; justify-content: space-between;
-            padding: 0 16px; position: fixed; top: 0; left: 0; right: 0; z-index: 30;
-            backdrop-filter: blur(8px);
-        }
-        .menu-trigger {
-            width: 36px; height: 36px; border-radius: 50%;
-            border: 1px solid var(--feed-blue); background: rgba(56, 189, 248, 0.1);
-            color: var(--feed-blue); display: flex; align-items: center; justify-content: center;
-            font-size: 16px; cursor: pointer;
-        }
-        .brand-title { font-family: var(--font-head); font-size: 15px; letter-spacing: 2px; color: var(--feed-blue); }
+    .tab-content {
+      display: none;
+    }
 
-        /* DRAWER LATERAL (TERMUX STYLE) */
-        .drawer-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 50; opacity: 0; pointer-events: none; transition: 0.3s; }
-        .drawer-overlay.open { opacity: 1; pointer-events: auto; }
-        .drawer-panel {
-            position: fixed; top: 0; bottom: 0; left: -280px; width: 260px;
-            background: rgba(10, 15, 24, 0.98); border-right: 2px solid var(--feed-blue);
-            z-index: 60; transition: left 0.3s; padding: 24px 16px; display: flex; flex-direction: column; gap: 20px;
-        }
-        .drawer-panel.open { left: 0; }
-        .drawer-item { display: flex; align-items: center; gap: 14px; padding: 10px; border-radius: 8px; cursor: pointer; }
+    .tab-content.active {
+      display: block;
+    }
 
-        .circle-icon {
-            width: 42px; height: 42px; border-radius: 50%;
-            display: flex; align-items: center; justify-content: center; font-size: 18px;
-        }
-        .icon-comms { border: 1px solid var(--comms-green); color: var(--comms-green); background: rgba(34, 197, 94, 0.1); }
-        .icon-feed { border: 1px solid var(--feed-blue); color: var(--feed-blue); background: rgba(56, 189, 248, 0.1); }
-        .icon-games { border: 1px solid var(--game-gold); color: var(--game-gold); background: rgba(245, 158, 11, 0.1); }
-        .icon-music { border: 1px solid var(--music-purple); color: var(--music-purple); background: rgba(217, 70, 239, 0.1); }
+    /* MENU DE NAVEGAÇÃO INFERIOR */
+    nav {
+      background: #161b22;
+      border-top: 1px solid #30363d;
+      display: flex;
+      justify-content: space-around;
+      padding: 10px 0;
+    }
 
-        .content-area { position: absolute; top: 50px; bottom: 0; left: 0; right: 0; overflow: hidden; }
-        .view-page { display: none; width: 100%; height: 100%; overflow-y: auto; padding: 16px; }
-        .view-page.active { display: block; }
+    nav button {
+      background: transparent;
+      border: none;
+      color: #8b949e;
+      font-size: 11px;
+      font-weight: bold;
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      transition: 0.3s;
+    }
 
-        /* SEÇÕES */
-        #view-comms { background: linear-gradient(180deg, #06090e 0%, #08120e 100%); }
-        #view-feed { padding: 0; }
-        .feed-container { height: 100%; overflow-y: scroll; scroll-snap-type: y mandatory; }
-        .video-card { height: 100%; width: 100%; scroll-snap-align: start; position: relative; background: #000; }
-        video { width: 100%; height: 100%; object-fit: cover; }
-        #view-games { background: linear-gradient(180deg, #06090e 0%, #150d03 100%); }
-        #view-music { background: linear-gradient(180deg, #06090e 0%, #140516 100%); text-align: center; }
+    nav button.active {
+      color: #00f0ff;
+      text-shadow: 0 0 8px #00f0ff;
+    }
 
-        .btn-action {
-            background: rgba(255,255,255,0.05); border: 1px solid #fff; color: #fff;
-            padding: 8px 16px; border-radius: 20px; font-family: var(--font-head); font-size: 11px; cursor: pointer;
-        }
-    </style>
+    /* CARDS DE JOGOS E SLOTS */
+    .game-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+      margin-top: 15px;
+    }
+
+    .game-card {
+      background: #161b22;
+      border: 1px solid #00f0ff;
+      border-radius: 8px;
+      padding: 15px;
+      text-align: center;
+      cursor: pointer;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    .game-card:active {
+      transform: scale(0.95);
+    }
+
+    .game-card-add {
+      background: rgba(0, 240, 255, 0.05);
+      border: 2px dashed #00f0ff;
+    }
+
+    /* PLAYER DE MÍDIA */
+    .media-box {
+      background: #161b22;
+      border: 1px solid #30363d;
+      border-radius: 8px;
+      padding: 15px;
+      margin-top: 15px;
+    }
+
+    ul.playlist {
+      list-style: none;
+      margin-top: 10px;
+      max-height: 200px;
+      overflow-y: auto;
+      border: 1px solid #21262d;
+      border-radius: 5px;
+    }
+
+    ul.playlist li {
+      padding: 10px;
+      border-bottom: 1px solid #21262d;
+      font-size: 11px;
+      color: #c9d1d9;
+      cursor: pointer;
+    }
+
+    /* MODAL DE PERMISSÕES */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(0, 0, 0, 0.85);
+      backdrop-filter: blur(5px);
+      z-index: 9999;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .modal-card {
+      background: #161b22;
+      border: 1px solid #00f0ff;
+      border-radius: 10px;
+      width: 85%;
+      max-width: 320px;
+      padding: 20px;
+      text-align: center;
+      box-shadow: 0 0 20px rgba(0, 240, 255, 0.3);
+    }
+
+    .btn-neon {
+      background: #00f0ff;
+      color: #000;
+      border: none;
+      padding: 12px 20px;
+      font-weight: bold;
+      border-radius: 4px;
+      cursor: pointer;
+      text-transform: uppercase;
+      font-size: 11px;
+      box-shadow: 0 0 10px rgba(0, 240, 255, 0.4);
+      width: 100%;
+    }
+  </style>
 </head>
 <body>
-    <div class="hud-frame"><div class="hud-corner-tl"></div><div class="hud-corner-br"></div></div>
 
-    <div class="top-bar">
-        <div class="menu-trigger" onclick="toggleDrawer()">☰</div>
-        <div class="brand-title">M7 OS</div>
-        <button class="btn-action" style="border-color:var(--feed-blue); color:var(--feed-blue);" onclick="alert('Use o app para transmissões!')">+ M7</button>
+  <header>
+    <h1>M7 // SYSTEM</h1>
+  </header>
+
+  <main>
+    <section id="tab-gamer" class="tab-content active">
+      <h3 style="font-size: 14px; border-bottom: 1px solid #30363d; padding-bottom: 5px;">// GAME LAUNCHER</h3>
+      
+      <div class="game-grid" id="gameGrid">
+        <div class="game-card" onclick="launchApp('com.dts.freefireth')">
+          <div style="font-size: 28px;">🔥</div>
+          <div style="color: #fff; font-weight: bold; font-size: 12px; margin-top: 5px;">Free Fire</div>
+          <div style="color: #3fb950; font-size: 9px; margin-top: 3px;">● Executar</div>
+        </div>
+
+        <div class="game-card" onclick="launchApp('com.proxima.deltaforce')">
+          <div style="font-size: 28px;">🎯</div>
+          <div style="color: #fff; font-weight: bold; font-size: 12px; margin-top: 5px;">Delta Force</div>
+          <div style="color: #3fb950; font-size: 9px; margin-top: 3px;">● Executar</div>
+        </div>
+
+        <div class="game-card game-card-add" onclick="addNewGameSlot()">
+          <div style="font-size: 28px; color: #00f0ff;">+</div>
+          <div style="color: #00f0ff; font-size: 10px; font-weight: bold;">NOVO SLOT</div>
+        </div>
+
+        <div class="game-card game-card-add" onclick="addNewGameSlot()">
+          <div style="font-size: 28px; color: #00f0ff;">+</div>
+          <div style="color: #00f0ff; font-size: 10px; font-weight: bold;">NOVO SLOT</div>
+        </div>
+      </div>
+
+      <div style="margin-top: 25px;">
+        <button class="btn-neon" onclick="startPermissionFlow()">🛡️ Configurar Permissões do Sistema</button>
+      </div>
+    </section>
+
+    <section id="tab-musicas" class="tab-content">
+      <h3 style="font-size: 14px; border-bottom: 1px solid #30363d; padding-bottom: 5px;">// HUB DE MÍDIA OFFLINE</h3>
+      
+      <div class="media-box" style="text-align: center;">
+        <input type="file" id="mediaInput" accept="audio/*,video/*" multiple style="display:none;" onchange="m7Player.loadFiles(event)">
+        <button class="btn-neon" onclick="document.getElementById('mediaInput').click()">📂 Carregar Músicas/Vídeos</button>
+      </div>
+
+      <div class="media-box">
+        <div id="trackTitle" style="color: #fff; font-weight: bold; font-size: 12px; margin-bottom: 8px;">Nenhuma faixa tocando</div>
+        <audio id="mainAudio" controls style="width: 100%; filter: invert(90%);"></audio>
+      </div>
+
+      <div class="media-box">
+        <span style="color: #58a6ff; font-size: 11px; font-weight: bold;">PLAYLIST LOCAL</span>
+        <ul id="playlist" class="playlist">
+          <li style="text-align: center; color: #8b949e;">Nenhum arquivo selecionado.</li>
+        </ul>
+      </div>
+    </section>
+
+    <section id="tab-mensagens" class="tab-content">
+      <h3 style="font-size: 14px; border-bottom: 1px solid #30363d; padding-bottom: 5px;">// CENTRAL M7</h3>
+      <p style="color: #8b949e; font-size: 12px; margin-top: 10px;">Status da memória offline: <strong style="color: #3fb950;">ATIVO (Cache PWA)</strong></p>
+    </section>
+  </main>
+
+  <nav>
+    <button class="nav-btn active" onclick="switchTab('tab-gamer', this)">
+      <span>🕹️</span> Hub Gamer
+    </button>
+    <button class="nav-btn" onclick="switchTab('tab-musicas', this)">
+      <span>🎵</span> Músicas
+    </button>
+    <button class="nav-btn" onclick="switchTab('tab-mensagens', this)">
+      <span>💬</span> M7 System
+    </button>
+  </nav>
+
+  <div id="permissionModal" class="modal-overlay">
+    <div class="modal-card">
+      <div id="permIcon" style="font-size: 32px; margin-bottom: 10px;">🎤</div>
+      <h4 id="permTitle" style="color: #00f0ff; font-size: 14px; margin-bottom: 8px;">PERMISSÃO DE MICROFONE</h4>
+      <p id="permDesc" style="color: #8b949e; font-size: 11px; margin-bottom: 15px; line-height: 1.4;"></p>
+      
+      <button class="btn-neon" onclick="grantCurrentPermission()" style="margin-bottom: 8px;">Permitir durante o uso</button>
+      <button onclick="nextPermissionStep()" style="background: transparent; color: #8b949e; border: 1px solid #30363d; padding: 8px; border-radius: 4px; font-size: 10px; width: 100%; cursor: pointer;">Negar / Pular</button>
     </div>
+  </div>
 
-    <div class="drawer-overlay" id="drawerOverlay" onclick="toggleDrawer()"></div>
-    <div class="drawer-panel" id="drawerPanel">
-        <h3 style="font-family:var(--font-head); color:var(--feed-blue); font-size:13px; margin-bottom:10px;">// M7 MODULES</h3>
-        <div class="drawer-item" onclick="navigate('comms')"><div class="circle-icon icon-comms">💬</div><span style="font-family:var(--font-head);">MENSAGENS</span></div>
-        <div class="drawer-item" onclick="navigate('feed')"><div class="circle-icon icon-feed">📡</div><span style="font-family:var(--font-head);">FEED STREAM</span></div>
-        <div class="drawer-item" onclick="navigate('games')"><div class="circle-icon icon-games">🎮</div><span style="font-family:var(--font-head);">HUB GAMER</span></div>
-        <div class="drawer-item" onclick="navigate('music')"><div class="circle-icon icon-music">🎶</div><span style="font-family:var(--font-head);">MÚSICAS</span></div>
-    </div>
+  <script src="./js/media-player.js"></script>
+  <script>
+    // Troca de Abas
+    function switchTab(tabId, btn) {
+      document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
+      document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+      document.getElementById(tabId).classList.add('active');
+      btn.classList.add('active');
+    }
 
-    <div class="content-area">
-        <div id="view-comms" class="view-page">
-            <h3 style="font-family:var(--font-head); color:var(--comms-green); font-size:13px;">// CENTRAL DE MENSAGENS</h3>
-            <p style="color:#94a3b8; font-size:12px; margin-top:10px;">Canal encriptado de comunicação M7 ativado.</p>
-        </div>
-        <div id="view-feed" class="view-page active">
-            <div class="feed-container" id="feedList">
-                <div style="padding:60px 20px; text-align:center;"><h4 style="color:var(--feed-blue); font-family:var(--font-head);">FEED STREAM M7</h4><p style="font-size:12px; color:#64748b;">Aguardando novas transmissões...</p></div>
-            </div>
-        </div>
-        <div id="view-games" class="view-page">
-            <h3 style="font-family:var(--font-head); color:var(--game-gold); font-size:13px;">// HUB GAMER</h3>
-            <p style="color:#94a3b8; font-size:12px; margin-top:10px;">Atalhos e estatísticas de jogos ativados.</p>
-        </div>
-        <div id="view-music" class="view-page">
-            <h3 style="font-family:var(--font-head); color:var(--music-purple); font-size:13px;">// PLAYER DE MÚSICA</h3>
-            <p style="color:#94a3b8; font-size:12px; margin-top:10px;">Acesso à biblioteca de áudio local.</p>
-        </div>
-    </div>
+    // Executar Jogos no Android
+    function launchApp(packageName) {
+      window.location.href = `intent://launch/#Intent;scheme=android-app;package=${packageName};end`;
+    }
 
-    <script>
-        function toggleDrawer() {
-            document.getElementById('drawerOverlay').classList.toggle('open');
-            document.getElementById('drawerPanel').classList.toggle('open');
-        }
-        function navigate(id) {
-            document.querySelectorAll('.view-page').forEach(p => p.classList.remove('active'));
-            document.getElementById('view-' + id).classList.add('active');
-            toggleDrawer();
-        }
-    </script>
+    function addNewGameSlot() {
+      const name = prompt("Nome do aplicativo/jogo:");
+      const pkg = prompt("Nome do pacote Android (ex: com.dts.freefireth):");
+      if (name && pkg) {
+        const grid = document.getElementById('gameGrid');
+        const card = document.createElement('div');
+        card.className = 'game-card';
+        card.onclick = () => launchApp(pkg);
+        card.innerHTML = `<div style="font-size: 28px;">🎮</div><div style="color: #fff; font-weight: bold; font-size: 12px; margin-top: 5px;">${name}</div><div style="color: #3fb950; font-size: 9px; margin-top: 3px;">● Executar</div>`;
+        grid.insertBefore(card, grid.children[grid.children.length - 2]);
+      }
+    }
+
+    // Fluxo de Permissões
+    let currentStep = 0;
+    const steps = [
+      { icon: "🎤", title: "MICROFONE", desc: "Necessário para chamadas de voz e áudio no app.", action: () => navigator.mediaDevices.getUserMedia({ audio: true }) },
+      { icon: "📁", title: "FOTOS E MÍDIA", desc: "Necessário para carregar suas músicas e arquivos salvos.", action: () => Promise.resolve() },
+      { icon: "📞", title: "TELEFONE", desc: "Necessário para gerenciar áudio durante chamadas de rede.", action: () => Promise.resolve() }
+    ];
+
+    function startPermissionFlow() {
+      currentStep = 0;
+      showStep();
+    }
+
+    function showStep() {
+      if (currentStep >= steps.length) {
+        document.getElementById('permissionModal').style.display = 'none';
+        alert('Configuração de permissões concluída!');
+        return;
+      }
+      const step = steps[currentStep];
+      document.getElementById('permIcon').textContent = step.icon;
+      document.getElementById('permTitle').textContent = `PERMISSÃO DE ${step.title}`;
+      document.getElementById('permDesc').textContent = step.desc;
+      document.getElementById('permissionModal').style.display = 'flex';
+    }
+
+    function grantCurrentPermission() {
+      steps[currentStep].action().then(() => nextPermissionStep()).catch(() => nextPermissionStep());
+    }
+
+    function nextPermissionStep() {
+      currentStep++;
+      showStep();
+    }
+
+    // Registra Service Worker Offline
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('./sw.js').then(() => console.log('M7 Offline PRONTO!'));
+    }
+  </script>
 </body>
 </html>
