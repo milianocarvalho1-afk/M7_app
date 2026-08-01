@@ -1,0 +1,11 @@
+{
+  "background_color": "#d6d410",
+  "dir": "ltr",
+  "display": "standalone",
+  "name": "M7",
+  "orientation": "any",
+  "scope": "/",
+  "short_name": "Mini_7",
+  "start_url": "/",
+  "theme_color": "#2ae00a"
+}
