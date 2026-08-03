@@ -1,26 +1,17 @@
 {
-  "name": "M7 OS Aplicativo",
-  "short_name": "M7 OS",
+  "name": "M7",
+  "short_name": "M7",
   "start_url": "./index.html",
   "display": "standalone",
-  "background_color": "#000000",
-  "theme_color": "#000000",
+  "background_color": "#030705",
+  "theme_color": "#00ff66",
   "orientation": "portrait",
   "icons": [
     {
-      "src": "downloadfile-131.png",
+      "src": "./downloadfile-131.png",
       "sizes": "512x512",
       "type": "image/png",
-      "purpose": "any"
-    },
-    {
-      "src": "downloadfile-131.png",
-      "sizes": "512x512",
-      "type": "image/png",
-      "purpose": "maskable"
+      "purpose": "any maskable"
     }
   ]
 }
-
-
-
